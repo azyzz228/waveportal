@@ -10,8 +10,15 @@ const main = async () => {
 
     await waveContract.getTotalWaves();
 
+    // First Connection
     const waveTxn = await waveContract.wave();
     await waveTxn.wait();
+
+    await waveContract.getTotalWaves();
+
+    // Second Connection
+    const secondWaveTxn = await waveContract.connect(randomPerson).wave();
+    await secondWaveTxn.wait();
 
     await waveContract.getTotalWaves();
 };
