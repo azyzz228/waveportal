@@ -24,5 +24,5 @@ dist-ssr
 *.sw?
 
 .env
-/artifacts
-/cache
+/frontend/artifacts
+/frontend/cache
