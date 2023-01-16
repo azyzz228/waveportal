@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import './App.css'
 import { ethers } from "ethers";
 import abi from "./utils/WavePortal.json"
@@ -42,10 +42,14 @@ function App() {
   const [totalWaves, setTotalWaves] = useState(null);
   const [status, setStatus] = useState('Not connected');
 
+  const [allWaves, setAllWaves] = useState([]);
 
-  const contractAddress = '0x1aeCb3450907604a70198e71EF140DA03343940C';
+  const contractAddress = '0x9681Fc28d304821D3D53cFD054d948AC8A591fD5';
   const contractABI = abi.abi;
 
+  const msgInputRef = useRef();
+
+  
 
 
   const connectWallet = async () => {
@@ -77,7 +81,7 @@ function App() {
         const signer = provider.getSigner();
         const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
     
-        const waveTxn = await wavePortalContract.wave();
+        const waveTxn = await wavePortalContract.wave(msgInputRef.current.value);
         setStatus('Mining...')
         console.log("Mining ...", waveTxn);
 
@@ -88,6 +92,10 @@ function App() {
         console.log("NEW Retrieved total wave count ...", count.toNumber());
         setTotalWaves(count.toNumber());
 
+        let waves = await wavePortalContract.getAllWaves();
+        console.log("all waves ->", waves);
+        wavesParser(waves);
+
       } else {
         console.log("Ethereum object does not exist!");
       }
@@ -97,13 +105,28 @@ function App() {
     }
   }
 
+  const wavesParser = (_waves) => {
+    let wavesCleaned = [];
+    _waves.forEach(e => {
+      wavesCleaned.push({
+        address: e.waver,
+        timestamp: new Date(e.timestamp * 1000),
+        message: e.message
+      })
+    })
+    setAllWaves(wavesCleaned);
+  }
+
   const getTotalWaves = async () => {
     const { ethereum } = window;
     const provider = new ethers.providers.Web3Provider(ethereum);
     const signer = provider.getSigner();
     const wavePortalContract = new ethers.Contract(contractAddress, contractABI, signer);
   
-    let count = await wavePortalContract.getTotalWaves();
+    const waves = await wavePortalContract.getAllWaves();
+    wavesParser(waves);
+
+    const count = await wavePortalContract.getTotalWaves();
     console.log("OLD retrieved total wave count ...", count.toNumber());
     setTotalWaves(count.toNumber());
   }
@@ -140,10 +163,27 @@ function App() {
         <button onClick={connectWallet} className="px-4 py-3 rounded-sm ring-1 ring-sky-500 hover:bg-sky-300">Connect Wallet</button>
       )}
       {currentAccount && (
-        <button className="px-4 py-3 rounded-sm ring-1 ring-sky-500 hover:bg-sky-300" onClick={() => wave()}>
+        <div className="flex flex-col justify-start items-start space-y-6">
+          <input type="text" name="" id="" ref={msgInputRef} required className='border border-slate-800 p-2' placeholder='Your message' />
+          <button className="px-4 py-3 rounded-sm ring-1 ring-sky-500 hover:bg-sky-300" onClick={() => wave()}>
           Wave at Me!
         </button>
+        </div>
       )}
+
+      {currentAccount && (
+        allWaves.map((wave, index) => {
+          return (
+            <div className="flex flex-col justify-start items-start mt-12 space-y-6 max-w-lg border border-red-400 p-3 " key={index}>
+              <p className='text-xs'>From: <span className='bg-sky-100 text-sky-800 p-2'>{wave.address}</span> </p>
+              <p>Time: {wave.timestamp.toString()}</p>
+              <p>Message: {wave.message}</p>
+            </div>
+          )
+        })
+      )}
+
+    
     </div>
   )
 }
