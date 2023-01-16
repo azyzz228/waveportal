@@ -129,18 +129,21 @@ function App() {
     <div className="container mx-auto p-16 font-mono">
       <h1 className='text-slate-800 font-bold text-base mb-2'>Salom <span className='text-base font-mono font-normal text-sky-500'>{`${currentAccount ? currentAccount+'!' : '!'}`}</span></h1>
 
-<div className="flex flex-row space-x-4 mb-12">
-{currentAccount ? <p className='px-2 py-2 bg-green-100 text-green-800'>Connected</p> : <p className='px-2 py-2 bg-red-100 text-red-800'>Not Connected</p>}
-<p className={`p-2 transform ${currentAccount ? 'opacity-100' : 'opacity-5'}`}>Total Waves: <span className='text-sky-500'>{totalWaves ? totalWaves : ''}</span></p>
-<p className={`p-2 ${currentAccount ? 'opacity-100' : 'opacity-5'}`}>Status: {status}</p>
-</div>
-      {!currentAccount && (
-        <button onClick={connectWallet} className="px-4 py-3 rounded-sm ring-1 ring-sky-500">Connect Wallet</button>
+      {currentAccount && (
+        <div className="flex flex-row space-x-4 mb-12">
+          <p className='px-2 py-2 bg-green-100 text-green-800'>Connected</p>
+          <p className="p-2 transform opacity-100">Total Waves: <span className='text-sky-500'>{totalWaves}</span></p>
+          <p className="p-2 'opacity-100">Status: {status}</p>
+        </div>
       )}
-
-      <button className={`px-4 py-3 rounded-sm ring-1 ring-sky-500 hover:bg-sky-300`} onClick={() => wave()}>
-        Wave at Me!
-      </button>
+      {!currentAccount && (
+        <button onClick={connectWallet} className="px-4 py-3 rounded-sm ring-1 ring-sky-500 hover:bg-sky-300">Connect Wallet</button>
+      )}
+      {currentAccount && (
+        <button className="px-4 py-3 rounded-sm ring-1 ring-sky-500 hover:bg-sky-300" onClick={() => wave()}>
+          Wave at Me!
+        </button>
+      )}
     </div>
   )
 }
